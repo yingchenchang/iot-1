@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VoiceRecognitionBlueGreenLEDsBonus</title>
+<link rel="stylesheet" href="style.css">
+<main>
+  <header><p class="eyebrow">BONUS · AMEBA · AMB82-MINI</p><h1>說一句，點亮一盞燈。</h1>
+    <p>用電腦麥克風說「左邊開燈」或「右邊開燈」。兩盞燈可獨立控制。</p></header>
+  <section class="panel">
+    <div class="toolbar"><button id="connect">連接開發板</button><button id="disconnect" disabled>中斷連線</button><span id="connection" role="status">尚未連線</span></div>
+    <p class="hint">請使用電腦版 Chrome，選取 AMB82 的 USB 連接埠（本機先前為 COM3），並關閉 Arduino 序列監控視窗。</p>
+    <div class="lights">
+      <article id="blueCard" class="light blue"><span class="orb"></span><h2>左邊 · 藍燈</h2><strong id="blueState">未知</strong><p>LED_B · PF9 · 腳位 23</p></article>
+      <article id="greenCard" class="light green"><span class="orb"></span><h2>右邊 · 綠燈</h2><strong id="greenState">未知</strong><p>LED_G · PE6 · 腳位 24</p></article>
+    </div>
+    <p id="updated" class="hint">等待開發板回報。顯示的是 GPIO 回讀結果，不是光學量測。</p>
+  </section>
+  <section class="panel">
+    <h2>語音控制</h2><p>按下按鈕後說一個口令，辨識完成即送出。說「閃爍三次」時，藍燈與綠燈會同步閃三次，最後一起熄滅。</p>
+    <button id="listen" class="primary" disabled>開始說話</button><button id="stop" disabled>取消聆聽</button>
+    <p id="speechStatus" role="status">尚未開始辨識</p>
+    <p class="hint">首次使用請允許麥克風。辨識服務可能將音訊傳至瀏覽器供應商的雲端，需要網路連線。</p>
+    <div class="result"><span>辨識結果</span><p id="transcript">—</p></div>
+    <div class="result"><span>指令執行情形</span><p id="execution" role="status">尚未送出指令</p></div>
+    <details><summary>文字測試與手動控制</summary>
+      <form id="textForm"><label for="text">輸入相同口令以測試傳輸</label><div class="toolbar"><input id="text" placeholder="左邊開燈" maxlength="100"><button id="send" disabled>送出</button></div></form>
+      <div class="toolbar"><button data-command="BLUE_ON" disabled>藍燈開</button><button data-command="GREEN_ON" disabled>綠燈開</button><button data-command="BLINK_THREE" disabled>藍綠閃三次</button><button data-command="ALL_OFF" disabled>全部關燈</button><button id="refresh" disabled>讀取狀態</button></div>
+    </details>
+  </section>
+  <footer>「左邊／右邊」是口令與顏色的對應，不隨開發板擺放方向改變。無效口令不會送出控制指令。</footer>
+</main>
+<script src="protocol.js"></script><script src="app.js"></script>
+</html>

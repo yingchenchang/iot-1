@@ -1,0 +1,25 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Protocol tests</title>
+<pre id="results">Running</pre><script src="protocol.js"></script><script>
+const tests = [];
+function check(name, condition) { tests.push({name, pass: !!condition}); }
+const P = LedProtocol;
+check('required blue phrase', P.recognize('左邊開燈') === 'BLUE_ON');
+check('required green phrase', P.recognize('右邊開燈。') === 'GREEN_ON');
+check('simplified transcript', P.recognize('右边开灯') === 'GREEN_ON');
+check('blink three phrase', P.recognize('閃爍三次') === 'BLINK_THREE');
+check('simplified blink phrase', P.recognize('闪烁三次。') === 'BLINK_THREE');
+for (const phrase of ['', '你好', '不要左邊開燈', '左邊開燈然後右邊開燈', '左邊開燈嗎', '左邊', 'BLUE_ON']) {
+  check('reject ' + JSON.stringify(phrase), P.recognize(phrase) === null);
+}
+check('valid board reply', P.parseReply('V1 123 OK AMB82-MINI 1 0').blue === true);
+for (const line of ['V1 1 OK OTHER 1 0', 'boot log', 'V1 1 OK AMB82-MINI 2 0', 'V1 1 OK AMB82-MINI 1 0 garbage']) {
+  check('reject malformed reply ' + line, P.parseReply(line) === null);
+}
+check('mismatched GPIO rejected', !P.matches('BLUE_ON', {blue:false,green:true}));
+check('both LEDs independently on', P.matches('GREEN_ON', {blue:true,green:true}));
+check('all off verifies both', !P.matches('ALL_OFF', {blue:false,green:true}));
+check('blink ends with both off', P.matches('BLINK_THREE', {blue:false,green:false}));
+check('blink rejects wrong final state', !P.matches('BLINK_THREE', {blue:true,green:false}));
+document.getElementById('results').textContent = tests.map(t => `${t.pass ? 'PASS' : 'FAIL'} ${t.name}`).join('\n');
+document.title = tests.every(t => t.pass) ? 'PASS' : 'FAIL';
+</script></html>

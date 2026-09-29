@@ -1,0 +1,76 @@
+<!doctype html><html><meta charset="utf-8"><title>Running</title><pre id="results">Running UI integration tests...</pre>
+<iframe id="app" title="Test application"></iframe>
+<script>
+(async () => {
+  const results = [];
+  const check = (name, value) => { results.push(`${value ? 'PASS' : 'FAIL'} ${name}`); if (!value) throw new Error(name); };
+  const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const fixture = await (await fetch('/')).text();
+  const mock = `
+    window.mock = { blue:false, green:false, writes:[], drop:false, stale:false, bootDrop:1, failOpen:false };
+    let controller;
+    const readable = new ReadableStream({start(c){controller=c;}});
+    const writable = new WritableStream({write(bytes){
+      const line = new TextDecoder().decode(bytes).trim();
+      mock.writes.push(line);
+      const [,id,cmd] = line.split(' ');
+      if(cmd==='STATUS' && mock.bootDrop>0){mock.bootDrop--;return;}
+      if(mock.drop) return;
+      if(mock.stale){controller.enqueue(new TextEncoder().encode('V1 0 OK AMB82-MINI 1 1\\n'));return;}
+      if(cmd==='BLUE_ON') mock.blue=true;
+      if(cmd==='GREEN_ON') mock.green=true;
+      if(cmd==='ALL_OFF') mock.blue=mock.green=false;
+      if(cmd==='BLINK_THREE') mock.blue=mock.green=false;
+      const reply = 'V1 '+id+' OK AMB82-MINI '+Number(mock.blue)+' '+Number(mock.green)+'\\n';
+      const bytesOut = new TextEncoder().encode(reply);
+      controller.enqueue(bytesOut.slice(0,9)); controller.enqueue(bytesOut.slice(9));
+    }});
+    Object.defineProperty(navigator, 'serial', {value:{requestPort:async()=>({readable,writable,open:async()=>{if(mock.failOpen)throw new Error('Access denied');},close:async()=>{}})},configurable:true});
+    window.SpeechRecognition = class {
+      constructor(){mock.speech=this;}
+      start(){}
+      abort(){this.onend();}
+    };
+  `;
+  const frame = document.getElementById('app');
+  const loaded = new Promise(resolve => frame.onload = resolve);
+  frame.srcdoc = fixture.replace('<script src="app.js"><' + '/script>', '<script>' + mock + '<' + '/script><script src="app.js"><' + '/script>');
+  try {
+    await loaded;
+    const w = frame.contentWindow, d = frame.contentDocument;
+    const el = id => d.getElementById(id);
+    await el('connect').onclick();
+    check('handshake enables controls', !el('listen').disabled);
+    check('boot timeout retries only STATUS', w.mock.writes.length===2 && w.mock.writes.every(line=>line.endsWith(' STATUS')));
+    check('initial board state is off', el('blueState').textContent.startsWith('滅'));
+    el('listen').click();
+    const speech = w.mock.speech;
+    const result = [{transcript:'左邊開燈'}]; result.isFinal = true;
+    speech.onresult({resultIndex:0,results:[result]}); speech.onend(); await pause(50);
+    check('voice result sends command and confirms GPIO', w.mock.blue && el('blueState').textContent.startsWith('亮'));
+    el('text').value='閃爍三次'; el('textForm').dispatchEvent(new Event('submit', {cancelable:true})); await pause(50);
+    check('blink voice command ends with both off', !w.mock.blue && !w.mock.green && el('execution').textContent.includes('閃爍三次'));
+    const count = w.mock.writes.length;
+    el('text').value='不要左邊開燈'; el('textForm').dispatchEvent(new Event('submit', {cancelable:true})); await pause(30);
+    check('negative phrase sends no control', w.mock.writes.length===count);
+    w.mock.stale=true;
+    el('text').value='右邊開燈'; el('textForm').dispatchEvent(new Event('submit', {cancelable:true}));
+    await pause(100);
+    check('wrong sequence cannot confirm command', !el('execution').textContent.startsWith('已確認'));
+    await pause(2450);
+    check('timeout shows unknown state', el('greenState').textContent==='未知');
+    check('timeout is visible', el('execution').textContent.includes('逾時'));
+    w.mock.stale=false;
+    await w.perform('STATUS');
+    check('status query recovers real state', el('greenState').textContent.startsWith('滅'));
+    await el('disconnect').onclick();
+    check('disconnect clears state and disables voice', el('blueState').textContent==='未知' && el('listen').disabled);
+    w.mock.failOpen=true;
+    await el('connect').onclick();
+    check('occupied port gets specific instructions', el('execution').textContent.includes('無法開啟 USB 連接埠') && el('execution').textContent.includes('其他控制網頁'));
+    check('failed open allows retry', !el('connect').disabled && el('listen').disabled);
+    document.title='PASS';
+  } catch(error) { results.push('ERROR '+error.message); document.title='FAIL'; }
+  document.getElementById('results').textContent=results.join('\n');
+})();
+</script></html>
