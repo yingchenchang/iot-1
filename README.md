@@ -1,7 +1,5 @@
 # VoiceRecognitionBlueGreenLEDsBonus
 
-本專案完整複製自 `VoiceRecognitionBlueGreenLEDs`，並改為獨立的 Arduino 專案。預設網頁網址為 **http://localhost:8766**，避免與原專案的 8765 衝突。
-
 **正式操作方式是使用麥克風說話。** `Terminal-Control.ps1` 只是文字通訊診斷工具，不是語音辨識介面，也不能代替本專案的語音驗收。
 
 在 `iot` 資料夾的 Terminal 執行下列命令啟動網頁（若已啟動則直接開啟網址）：
