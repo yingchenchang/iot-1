@@ -10,6 +10,7 @@ $commands = @{
     '右邊關燈' = 'GREEN_OFF'
     '全部關燈' = 'ALL_OFF'
     '閃爍三次' = 'BLINK_THREE'
+    '閃爍3次' = 'BLINK_THREE'
     '狀態' = 'STATUS'
 }
 $sequence = Get-Random -Minimum 100000 -Maximum 1000000000
@@ -61,7 +62,7 @@ try {
     if ($Text) {
         Send-Control $commands[$Text.Trim()]
     } else {
-        Write-Host '輸入：左邊開燈、右邊開燈、左邊關燈、右邊關燈、全部關燈、閃爍三次、狀態、離開'
+        Write-Host '輸入：左邊開燈、右邊開燈、左邊關燈、右邊關燈、全部關燈、閃爍三次、閃爍3次、狀態、離開'
         Write-Host '顯示的是上次開發板 GPIO 回報；要更新請輸入「狀態」。離開不會自動關燈。'
         while ($true) {
             $inputText = Read-Host '指令'

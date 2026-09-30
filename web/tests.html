@@ -7,7 +7,10 @@ check('required blue phrase', P.recognize('左邊開燈') === 'BLUE_ON');
 check('required green phrase', P.recognize('右邊開燈。') === 'GREEN_ON');
 check('simplified transcript', P.recognize('右边开灯') === 'GREEN_ON');
 check('blink three phrase', P.recognize('閃爍三次') === 'BLINK_THREE');
+check('blink numeric phrase', P.recognize('閃爍3次') === 'BLINK_THREE');
+check('blink numeric phrase with spaces', P.recognize('閃爍 3 次。') === 'BLINK_THREE');
 check('simplified blink phrase', P.recognize('闪烁三次。') === 'BLINK_THREE');
+check('simplified numeric blink phrase', P.recognize('闪烁3次') === 'BLINK_THREE');
 for (const phrase of ['', '你好', '不要左邊開燈', '左邊開燈然後右邊開燈', '左邊開燈嗎', '左邊', 'BLUE_ON']) {
   check('reject ' + JSON.stringify(phrase), P.recognize(phrase) === null);
 }

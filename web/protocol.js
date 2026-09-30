@@ -6,7 +6,8 @@ window.LedProtocol = (() => {
     ['左邊關燈', 'BLUE_OFF'], ['左边关灯', 'BLUE_OFF'],
     ['右邊關燈', 'GREEN_OFF'], ['右边关灯', 'GREEN_OFF'],
     ['全部關燈', 'ALL_OFF'], ['全部关灯', 'ALL_OFF'],
-    ['閃爍三次', 'BLINK_THREE'], ['闪烁三次', 'BLINK_THREE']
+    ['閃爍三次', 'BLINK_THREE'], ['閃爍3次', 'BLINK_THREE'],
+    ['闪烁三次', 'BLINK_THREE'], ['闪烁3次', 'BLINK_THREE']
   ]);
   function recognize(text) {
     const normalized = text.trim().replace(/\s+/g, '').replace(/[。.!！?？,，、]+$/u, '');

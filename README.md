@@ -82,7 +82,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\VoiceRecognitionBlueGreenL
 | 左邊關燈 | BLUE_OFF | 藍燈滅，綠燈不變 |
 | 右邊關燈 | GREEN_OFF | 綠燈滅，藍燈不變 |
 | 全部關燈 | ALL_OFF | 兩燈滅 |
-| 閃爍三次 | BLINK_THREE | 藍燈、綠燈同步亮 0.3 秒／滅 0.3 秒，共三次，最後兩燈熄滅 |
+| 閃爍三次／閃爍3次 | BLINK_THREE | 藍燈、綠燈同步亮 0.3 秒／滅 0.3 秒，共三次，最後兩燈熄滅 |
 
 實機驗證（2026-09-24）：Bonus 韌體已燒錄至 COM3。重新插拔 USB 後送出 `BLINK_THREE`，AMB82-MINI 在約 1.8 秒後回覆 `OK`，GPIO 狀態為藍=0、綠=0，符合三次閃爍後兩燈熄滅的設計。
 
